@@ -17,11 +17,48 @@ SetPositionIssue::SetPositionIssue(const InstanceInfo& info)
     pGraphics->AttachPanelBackground(COLOR_GRAY);
     pGraphics->LoadFont("Roboto-Regular", ROBOTO_FN);
     const IRECT b = pGraphics->GetBounds();
-    pGraphics->AttachControl(new ITextControl(b.GetMidVPadded(50), "Hello iPlug 2!", IText(50)));
-    pGraphics->AttachControl(new IVKnobControl(b.GetCentredInside(100).GetVShifted(-100), kGain));
+    for (int i = 0; i < 4; ++i)
+    {
+      for (int j = 0; j < 20; ++j)
+      {
+        IRECT r;
+        r.L = 30 + 100*(float)i;
+        r.R = r.L + 100;
+        r.T = 30 + 20*(float)j;
+        r.B = r.T + 30;
+        pGraphics->AttachControl(new ITextControl(r, "Hello iPlug 2!", IText(15)));
+      }
+    }
+
+    mPosY = 0;
+
+    IRECT r;
+    r.L = 30;
+    r.R = r.L + 500;
+    r.T = mPosY;
+    r.B = r.T + 30;
+    mButton = new IVButtonControl(r);
+    pGraphics->AttachControl(mButton);
   };
 #endif
 }
+
+void SetPositionIssue::OnIdle()
+{
+  mButton->SetPosition(30,mPosY);
+
+  mPosY += 30;
+  if (mPosY > 600)
+  {
+    mPosY = 0;
+  }
+
+  ////////////////////////////////////////////////
+  // UNCOMMENT THIS LINE TO REPRODUCE THE ISSUE
+  ////////////////////////////////////////////////
+  GetUI()->SetAllControlsDirty();
+}
+
 
 #if IPLUG_DSP
 void SetPositionIssue::ProcessBlock(sample** inputs, sample** outputs, int nFrames)
