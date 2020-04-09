@@ -776,9 +776,38 @@ void IKnobControlBase::OnMouseDrag(float x, float y, float dX, float dY, const I
   IRECT dragBounds = GetKnobDragBounds();
 
   if (mDirection == EDirection::Vertical)
-    SetValue(GetValue() + (double) dY / (double)(dragBounds.T - dragBounds.B) / gearing);
+    mMouseDragValue += (double) dY / (double)(dragBounds.T - dragBounds.B) / gearing;
   else
-    SetValue(GetValue() + (double) dX / (double)(dragBounds.R - dragBounds.L) / gearing);
+    mMouseDragValue += (double) dX / (double)(dragBounds.R - dragBounds.L) / gearing;
+
+  if (mMouseDragValue < 0)
+    mMouseDragValue = 0;
+  if (mMouseDragValue > 1)
+    mMouseDragValue = 1;
+
+  double v = mMouseDragValue;
+  const IParam* param = GetParam();
+  if (param != NULL && param->GetStepped() && param->GetStep() > 0)
+  {
+    double l;
+    double h;
+    param->GetBounds(l,h);
+
+    double range = h-l;
+
+    if ( range > 0 )
+    {
+      v = l + mMouseDragValue*range;
+
+      double step = param->GetStep();
+      v = v - fmod(v,step);
+
+      v -= l;
+      v /= range;
+    }
+  }
+
+  SetValue(v);
 
   SetDirty();
 }
@@ -787,7 +816,37 @@ void IKnobControlBase::OnMouseWheel(float x, float y, const IMouseMod& mod, floa
 {
   double gearing = IsFineControl(mod, true) ? 0.001 : 0.01;
 
-  SetValue(GetValue() + gearing * d);
+  double v = GetValue() + gearing * d;
+  const IParam* param = GetParam();
+  if (param != NULL && param->GetStepped() && param->GetStep() > 0)
+  {
+    double l;
+    double h;
+    param->GetBounds(l,h);
+
+    double range = h-l;
+
+    if ( range > 0 && d != 0)
+    {
+      v = l + GetValue()*range;
+
+      double step = param->GetStep();
+      v += d > 0 ? step : -step;
+      if ( v < l )
+        v = l;
+      if ( v > h )
+        v = h;
+
+      v = v - fmod(v,step);
+
+      v -= l;
+      v /= range;
+    }
+  }
+
+  OutputDebugString("aaaa\n");
+
+  SetValue(v);
   SetDirty();
 }
 

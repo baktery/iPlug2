@@ -1144,6 +1144,8 @@ public:
   {
     mMouseDown = true;
 
+    mMouseDragValue = GetValue();
+
     if (mHideCursorOnDrag)
       GetUI()->HideMouseCursor(true, true);
 
@@ -1173,6 +1175,7 @@ protected:
   EDirection mDirection;
   double mGearing;
   bool mMouseDown = false;
+  double mMouseDragValue;
 };
 
 /** A base class for slider/fader controls, to handle mouse action and Sender. */
