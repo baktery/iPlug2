@@ -844,8 +844,6 @@ void IKnobControlBase::OnMouseWheel(float x, float y, const IMouseMod& mod, floa
     }
   }
 
-  OutputDebugString("aaaa\n");
-
   SetValue(v);
   SetDirty();
 }
